@@ -7,60 +7,132 @@
   <link rel="stylesheet" href="https://unpkg.com/leaflet@1.7.1/dist/leaflet.css" />
   <script src="https://unpkg.com/leaflet@1.7.1/dist/leaflet.js"></script>
   <style>
+    :root {
+      --color-primary: #2c3e50;
+      --color-secondary: #3498db;
+      --color-accent: #e74c3c;
+      --color-light: #ecf0f1;
+      --color-success: #27ae60;
+    }
+    
     * {
       margin: 0;
       padding: 0;
       box-sizing: border-box;
-      font-family: Arial, sans-serif;
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
     }
+    
     body {
       padding: 10px;
-      background-color: #f5f5f5;
+      background-color: #f9f9f9;
+      color: #333;
+      line-height: 1.6;
     }
+    
     .container {
       max-width: 100%;
-      border-radius: 10px;
+      border-radius: 12px;
       overflow: hidden;
-      box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+      box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+      background: white;
+      margin-bottom: 20px;
     }
+    
     #map {
       width: 100%;
       height: 300px;
+      border-bottom: 3px solid var(--color-secondary);
     }
+    
     .formulario {
-      padding: 15px;
-      background-color: #fff;
+      padding: 20px 15px;
     }
+    
     h2 {
-      font-size: 18px;
-      margin-bottom: 15px;
-      color: #333;
+      font-size: 1.4rem;
+      margin-bottom: 20px;
+      color: var(--color-primary);
       text-align: center;
+      font-weight: 600;
+      padding-bottom: 10px;
+      border-bottom: 2px solid var(--color-light);
     }
-    label, select, textarea, button {
+    
+    label {
+      display: block;
+      margin-bottom: 8px;
+      font-weight: 500;
+      color: var(--color-primary);
+    }
+    
+    select, textarea, input {
       width: 100%;
-      margin-bottom: 10px;
-    }
-    select, textarea {
-      padding: 10px;
-      border: 1px solid #ddd;
-      border-radius: 5px;
-    }
-    textarea {
-      min-height: 80px;
-    }
-    button {
-      background-color: #4CAF50;
-      color: white;
-      border: none;
       padding: 12px;
-      border-radius: 5px;
-      font-size: 16px;
-      cursor: pointer;
+      margin-bottom: 15px;
+      border: 2px solid #ddd;
+      border-radius: 8px;
+      font-size: 1rem;
+      transition: border-color 0.3s;
     }
+    
+    select:focus, textarea:focus, input:focus {
+      border-color: var(--color-secondary);
+      outline: none;
+    }
+    
+    textarea {
+      min-height: 100px;
+      resize: vertical;
+    }
+    
+    .button-group {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      margin-top: 15px;
+    }
+    
+    button {
+      padding: 14px;
+      border-radius: 8px;
+      font-size: 1rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.3s;
+      border: none;
+    }
+    
     #ubicacionActual {
-      background-color: #2196F3;
-      margin-top: 10px;
+      background-color: var(--color-secondary);
+      color: white;
+    }
+    
+    #ubicacionActual:hover {
+      background-color: #2980b9;
+    }
+    
+    button[type="submit"] {
+      background-color: var(--color-success);
+      color: white;
+    }
+    
+    button[type="submit"]:hover {
+      background-color: #219955;
+    }
+    
+    .required-field::after {
+      content: " *";
+      color: var(--color-accent);
+    }
+    
+    @media (max-width: 480px) {
+      .formulario {
+        padding: 15px 10px;
+      }
+      
+      select, textarea, input {
+        padding: 10px;
+      }
     }
   </style>
 </head>
@@ -68,10 +140,9 @@
   <div class="container">
     <div id="map"></div>
     <div class="formulario">
-      <h2>Reportar Problemática Ambiental</h2>
+      <h2>Sistema de Reporte Ambiental</h2>
       <form id="reporteForm">
-        <!-- Problemática -->
-        <label for="problematica">Tipo de problemática:</label>
+        <label for="problematica" class="required-field">Tipo de problemática</label>
         <select id="problematica" name="problematica" required>
           <option value="">Seleccionar...</option>
           <option value="Postes Caídos">Postes Caídos</option>
@@ -79,82 +150,130 @@
           <option value="Basurales">Basurales</option>
         </select>
 
-        <!-- Detalles -->
-        <label for="detalles">Detalles (opcional):</label>
+        <label for="detalles">Ampliación / Detalles</label>
         <textarea id="detalles" name="detalles" placeholder="Describa el problema..."></textarea>
 
-        <!-- Campos ocultos para coordenadas -->
-        <input type="hidden" id="latitud" name="latitud">
-        <input type="hidden" id="longitud" name="longitud">
+        <label for="direccion" class="required-field">Dirección</label>
+        <input type="text" id="direccion" name="direccion" placeholder=" MENCIONE CALLE Y ENTRE CALLE " required>
 
-        <!-- Botones -->
-        <button type="button" id="ubicacionActual" onclick="obtenerUbicacion()">Usar mi ubicación actual</button>
-        <button type="submit">Enviar Reporte</button>
+        <input type="hidden" id="Y" name="Y">
+        <input type="hidden" id="X" name="X">
+        <input type="hidden" id="fechaCarga" name="fechaCarga">
+
+        <div class="button-group">
+          <button type="button" id="ubicacionActual" onclick="obtenerUbicacion()">
+            📍 Usar mi ubicación actual
+          </button>
+          <button type="submit">
+            📤 Enviar Reporte
+          </button>
+        </div>
       </form>
     </div>
   </div>
 
   <script>
-    // Mapa
-    var map = L.map('map').setView([-34.6037, -58.3816], 13); // Ejemplo: Buenos Aires
+    var map = L.map('map').setView([-34.6037, -58.3816], 13);
     L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
       attribution: '&copy; OpenStreetMap'
     }).addTo(map);
 
-    // Marcador
+    var markerIcon = L.icon({
+      iconUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.7.1/images/marker-icon.png',
+      iconSize: [25, 41],
+      iconAnchor: [12, 41]
+    });
+    
     var marker;
     map.on('click', function(e) {
       if (marker) {
         marker.setLatLng(e.latlng);
       } else {
-        marker = L.marker(e.latlng).addTo(map);
+        marker = L.marker(e.latlng, {icon: markerIcon}).addTo(map);
       }
-      document.getElementById('latitud').value = e.latlng.lat;
-      document.getElementById('longitud').value = e.latlng.lng;
+      document.getElementById('Y').value = e.latlng.lat.toFixed(6); 
+      document.getElementById('X').value = e.latlng.lng.toFixed(6); 
     });
 
-    // Geolocalización
     function obtenerUbicacion() {
       if (navigator.geolocation) {
-        navigator.geolocation.getCurrentPosition(function(position) {
-          var lat = position.coords.latitude;
-          var lng = position.coords.longitude;
-          map.setView([lat, lng], 15);
-          if (marker) {
-            marker.setLatLng([lat, lng]);
-          } else {
-            marker = L.marker([lat, lng]).addTo(map);
-          }
-          document.getElementById('latitud').value = lat;
-          document.getElementById('longitud').value = lng;
-          alert("Ubicación actual cargada!");
-        });
+        navigator.geolocation.getCurrentPosition(
+          function(position) {
+            var lat = position.coords.latitude;
+            var lng = position.coords.longitude;
+            map.setView([lat, lng], 15);
+            if (marker) {
+              marker.setLatLng([lat, lng]);
+            } else {
+              marker = L.marker([lat, lng], {icon: markerIcon}).addTo(map);
+            }
+            document.getElementById('Y').value = lat.toFixed(6);  
+            document.getElementById('X').value = lng.toFixed(6); 
+          },
+          function(error) {
+            let errorMessage;
+            switch(error.code) {
+              case error.PERMISSION_DENIED:
+                errorMessage = "Se denegó el acceso a la geolocalización. Por favor habilítalo en los ajustes de tu navegador.";
+                break;
+              case error.POSITION_UNAVAILABLE:
+                errorMessage = "La información de ubicación no está disponible.";
+                break;
+              case error.TIMEOUT:
+                errorMessage = "La solicitud de geolocalización ha expirado.";
+                break;
+              default:
+                errorMessage = "Error desconocido al obtener la ubicación.";
+            }
+            alert(errorMessage);
+          },
+          { enableHighAccuracy: true, timeout: 10000 }
+        );
       } else {
         alert("Tu navegador no soporta geolocalización.");
       }
     }
 
-    // Enviar datos
     document.getElementById('reporteForm').addEventListener('submit', function(e) {
       e.preventDefault();
       
-      // Validar
-      if (!document.getElementById('latitud').value || !document.getElementById('problematica').value) {
-        alert("¡Selecciona un punto en el mapa y elige una problemática!");
+      if (!document.getElementById('Y').value) {
+        alert("Por favor, selecciona un punto en el mapa o usa tu ubicación actual.");
+        return;
+      }
+      
+      if (!document.getElementById('direccion').value) {
+        alert("Por favor, completa el campo de dirección.");
+        return;
+      }
+      
+      if (!document.getElementById('problematica').value) {
+        alert("Por favor, selecciona un tipo de problemática.");
         return;
       }
 
-      // Datos a enviar
+      const submitBtn = document.querySelector('button[type="submit"]');
+      const originalBtnText = submitBtn.textContent;
+      submitBtn.innerHTML = '⏳ Enviando...';
+      submitBtn.disabled = true;
+
       var data = {
-        Problematica: document.getElementById('problematica').value,
-        Detalles: document.getElementById('detalles').value,
-        Latitud: document.getElementById('latitud').value,
-        Longitud: document.getElementById('longitud').value,
-        Fecha: new Date().toLocaleString()
+        "Fecha y Hora de Carga": new Date().toLocaleString('es-AR', {
+          day: '2-digit',
+          month: '2-digit',
+          year: 'numeric',
+          hour: '2-digit',
+          minute: '2-digit',
+          second: '2-digit'
+        }),
+        "Dirección": document.getElementById('direccion').value,
+        "Problemática": document.getElementById('problematica').value,
+        "Ampliación / Detalles": document.getElementById('detalles').value,
+        "Y": document.getElementById('Y').value,
+        "X": document.getElementById('X').value
       };
 
-      // SheetBest API (¡Reemplaza con tu URL!)
-      fetch('https://api.sheetbest.com/sheets/TU_ID_DE_HOJA', {
+      fetch('https://api.sheetbest.com/sheets/07e37804-b3ae-4786-8a84-7867b0cfaad2', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(data)
@@ -166,11 +285,16 @@
           if (marker) map.removeLayer(marker);
           marker = null;
         } else {
-          throw new Error("Error al enviar");
+          throw new Error('Error en la respuesta del servidor');
         }
       })
       .catch(error => {
-        alert("Error: " + error.message);
+        console.error('Error:', error);
+        alert("Hubo un error al enviar el reporte. Por favor intenta nuevamente.");
+      })
+      .finally(() => {
+        submitBtn.textContent = originalBtnText;
+        submitBtn.disabled = false;
       });
     });
   </script>
